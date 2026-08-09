@@ -441,11 +441,11 @@ namespace shoppinglist
             {
                 if (sender is Button button && button.Tag is HouseholdItem catItem)
                 {
-                    var newItem = new ShoppingItem 
-                    { 
-                        Name = catItem.Name, 
-                        IsPurchased = false, 
-                        CatalogItemId = catItem.Id 
+                    var newItem = new ShoppingItem
+                    {
+                        Name = catItem.Name,
+                        IsPurchased = false,
+                        CatalogItemId = catItem.Id
                     };
                     newItem.PropertyChanged += Item_PropertyChanged;
                     _items.Add(newItem);
@@ -454,6 +454,29 @@ namespace shoppinglist
 
                     // Optionally switch to the shopping list tab to show it was added
                     // e.g. MyTabControl.SelectedIndex = 0; if we had x:Name="MyTabControl"
+                }
+            }
+
+            private void RemoveCatalogItem_Click(object sender, RoutedEventArgs e)
+            {
+                if (sender is Button button && button.Tag is HouseholdItem catItem)
+                {
+                    // Delete associated image file if it exists
+                    if (!string.IsNullOrEmpty(catItem.ImagePath) && File.Exists(catItem.ImagePath))
+                    {
+                        try
+                        {
+                            File.Delete(catItem.ImagePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Failed to delete image: {ex.Message}", "Image Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                    }
+
+                    _catalog.Remove(catItem);
+                    SaveCatalog();
+                    RefreshCatalog();
                 }
             }
         }

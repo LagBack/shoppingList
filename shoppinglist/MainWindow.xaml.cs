@@ -321,17 +321,32 @@ namespace shoppinglist
                 SearchImageButton.IsEnabled = false;
                 SelectedImagePathTextBlock.Text = "Searching internet...";
 
+                // Setup header required by Wikipedia API
+                if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
+                {
+                    _httpClient.DefaultRequestHeaders.Add("User-Agent", "ShoppingListApp/1.0");
+                }
+
                 try
                 {
-                    // Setup header required by Wikipedia API
-                    if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
+                    const int maxRetries = 3;
+                    HttpResponseMessage response = null!;
+                    for (int attempt = 0; attempt < maxRetries; attempt++)
                     {
-                        _httpClient.DefaultRequestHeaders.Add("User-Agent", "ShoppingListApp/1.0");
-                    }
+                        string url = $"https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&pithumbsize=200&titles={Uri.EscapeDataString(keyword)}";
+                        response = await _httpClient.GetAsync(url);
 
-                    string url = $"https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&pithumbsize=200&titles={Uri.EscapeDataString(keyword)}";
-                    HttpResponseMessage response = await _httpClient.GetAsync(url);
-                    response.EnsureSuccessStatusCode();
+                        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                        {
+                            int delayMs = (int)(Math.Pow(2, attempt) * 1000); // 1s, 2s, 4s
+                            SelectedImagePathTextBlock.Text = $"Rate limited — retrying in {delayMs / 1000}s ({attempt + 1}/{maxRetries})...";
+                            await Task.Delay(delayMs);
+                            continue;
+                        }
+
+                        response.EnsureSuccessStatusCode();
+                        break; // Success or non-retryable error
+                    }
 
                     string jsonResponse = await response.Content.ReadAsStringAsync();
 

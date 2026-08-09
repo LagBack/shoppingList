@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -39,11 +42,56 @@ namespace shoppinglist
     public partial class MainWindow : Window
     {
         private List<ShoppingItem> _items = new List<ShoppingItem>();
+        private const string SaveFilePath = "shoppinglist.json";
 
         public MainWindow()
         {
             InitializeComponent();
+            LoadList();
             RefreshList();
+        }
+
+        private void LoadList()
+        {
+            try
+            {
+                if (File.Exists(SaveFilePath))
+                {
+                    string json = File.ReadAllText(SaveFilePath);
+                    _items = JsonSerializer.Deserialize<List<ShoppingItem>>(json) ?? new List<ShoppingItem>();
+
+                    foreach (var item in _items)
+                    {
+                        item.PropertyChanged += Item_PropertyChanged;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading shopping list: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _items = new List<ShoppingItem>();
+            }
+        }
+
+        private void SaveList()
+        {
+            try
+            {
+                string json = JsonSerializer.Serialize(_items, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(SaveFilePath, json);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving shopping list: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ShoppingItem.IsPurchased) || e.PropertyName == nameof(ShoppingItem.Name))
+            {
+                SaveList();
+            }
         }
 
         private void AddItem()
@@ -51,8 +99,11 @@ namespace shoppinglist
             var text = ItemNameTextBox.Text.Trim();
             if (!string.IsNullOrEmpty(text))
             {
-                _items.Add(new ShoppingItem { Name = text, IsPurchased = false });
+                var newItem = new ShoppingItem { Name = text, IsPurchased = false };
+                newItem.PropertyChanged += Item_PropertyChanged;
+                _items.Add(newItem);
                 ItemNameTextBox.Clear();
+                SaveList();
                 RefreshList();
             }
         }
@@ -74,14 +125,22 @@ namespace shoppinglist
         {
             if (sender is Button button && button.Tag is ShoppingItem item)
             {
+                item.PropertyChanged -= Item_PropertyChanged;
                 _items.Remove(item);
+                SaveList();
                 RefreshList();
             }
         }
 
         private void ClearPurchasedButton_Click(object sender, RoutedEventArgs e)
         {
+            var purchasedItems = _items.Where(i => i.IsPurchased).ToList();
+            foreach (var item in purchasedItems)
+            {
+                item.PropertyChanged -= Item_PropertyChanged;
+            }
             _items.RemoveAll(i => i.IsPurchased);
+            SaveList();
             RefreshList();
         }
 

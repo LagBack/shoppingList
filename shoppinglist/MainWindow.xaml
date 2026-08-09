@@ -6,43 +6,88 @@
         xmlns:local="clr-namespace:shoppinglist"
         mc:Ignorable="d"
         Title="My Shopping List" Height="450" Width="400">
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <TabControl>
+        <!-- Shopping List Tab -->
+        <TabItem Header="Shopping List">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-        <TextBlock Text="MY SHOPPING LIST" FontWeight="Bold" FontSize="18" Margin="0,0,0,10"/>
+                <TextBlock Text="MY SHOPPING LIST" FontWeight="Bold" FontSize="18" Margin="0,0,0,10"/>
 
-        <Grid Grid.Row="1" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox x:Name="ItemNameTextBox" Margin="0,0,5,0" KeyDown="ItemNameTextBox_KeyDown" VerticalContentAlignment="Center"/>
-            <Button x:Name="AddButton" Content="Add Item" Padding="10,5" Grid.Column="1" Click="AddButton_Click"/>
-        </Grid>
+                <Grid Grid.Row="1" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ItemNameTextBox" Margin="0,0,5,0" KeyDown="ItemNameTextBox_KeyDown" VerticalContentAlignment="Center"/>
+                    <Button x:Name="AddButton" Content="Add Item" Padding="10,5" Grid.Column="1" Click="AddButton_Click"/>
+                </Grid>
 
-        <ListBox x:Name="ShoppingListBox" Grid.Row="2" Margin="0,0,0,10" SelectionMode="Single" HorizontalContentAlignment="Stretch">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <CheckBox IsChecked="{Binding IsPurchased, Mode=TwoWay}" Content="{Binding Name}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked" VerticalAlignment="Center"/>
-                        <Button Content="Remove" Grid.Column="1" Margin="10,0,0,0" Padding="5,0" Tag="{Binding}" Click="RemoveButton_Click"/>
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                <ListBox x:Name="ShoppingListBox" Grid.Row="2" Margin="0,0,0,10" SelectionMode="Single" HorizontalContentAlignment="Stretch">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox IsChecked="{Binding IsPurchased, Mode=TwoWay}" Content="{Binding Name}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked" VerticalAlignment="Center"/>
+                                <Button Content="Remove" Grid.Column="1" Margin="10,0,0,0" Padding="5,0" Tag="{Binding}" Click="RemoveButton_Click"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-        <Grid Grid.Row="3">
-            <TextBlock x:Name="StatusTextBlock" Text="0 items" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-            <Button x:Name="ClearPurchasedButton" Content="Clear Purchased" Padding="10,5" HorizontalAlignment="Right" Click="ClearPurchasedButton_Click"/>
-        </Grid>
-    </Grid>
+                <Grid Grid.Row="3">
+                    <TextBlock x:Name="StatusTextBlock" Text="0 items" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <Button x:Name="ClearPurchasedButton" Content="Clear Purchased" Padding="10,5" HorizontalAlignment="Right" Click="ClearPurchasedButton_Click"/>
+                </Grid>
+            </Grid>
+        </TabItem>
+
+        <!-- Catalog Tab -->
+        <TabItem Header="Catalog">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="MY ITEMS" FontWeight="Bold" FontSize="18" Margin="0,0,0,10"/>
+
+                <Grid Grid.Row="1" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="CatalogItemNameTextBox" Margin="0,0,5,0" KeyDown="CatalogItemNameTextBox_KeyDown" VerticalContentAlignment="Center" />
+                    <Button x:Name="AddCatalogItemButton" Content="Add to Catalog" Padding="10,5" Grid.Column="1" Click="AddCatalogItemButton_Click" />
+                </Grid>
+
+                <ListBox x:Name="CatalogListBox" Grid.Row="2" Margin="0,0,0,10" SelectionMode="Single" HorizontalContentAlignment="Stretch">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TimesPurchased, StringFormat='{}Purchased: {0} times'}" FontSize="10" Foreground="Gray" />
+                                </StackPanel>
+                                <Button Content="Add to List" Grid.Column="1" Margin="10,0,0,0" Padding="5,0" Tag="{Binding}" Click="AddFromCatalogButton_Click"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>
